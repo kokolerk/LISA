@@ -8,7 +8,10 @@ from torch.utils.data import Subset
 from data.confounder_utils import prepare_confounder_data, prepare_group_confounder_data
 from data.label_shift_utils import prepare_label_shift_data
 
-root_dir = './data/'
+# changed to env data
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..','..'))
+
+root_dir = os.path.join(parent_dir,'data')
 
 dataset_attributes = {
     'CelebA': {
@@ -84,6 +87,9 @@ def prepare_group_data(args, group_id, train_data=None, return_full_dataset=Fals
     return prepare_group_confounder_data(args, group_id, train_data=train_data, return_full_dataset=return_full_dataset)
 
 def log_data(data, logger):
+    '''
+    train data loader
+    '''
     logger.write('Training Data...\n')
     for group_idx in range(data['train_data'].n_groups):
         logger.write(f'    {data["train_data"].group_str(group_idx)}: n = {data["train_data"].group_counts()[group_idx]:.0f}\n')

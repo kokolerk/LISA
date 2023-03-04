@@ -155,6 +155,7 @@ class CMNISTDataset(ConfounderDataset):
         # self.attrs_df = pd.read_csv(
         #     os.path.join(root_dir, 'data', 'list_attr_celeba.csv'))
 
+        # torch.load acturally
         self.colored_mnist_train = ColoredMNIST(root=root_dir, env='train1')
         self.colored_mnist_val = ColoredMNIST(root=root_dir, env='val')
         self.colored_mnist_test = ColoredMNIST(root=root_dir, env='test')
@@ -168,7 +169,9 @@ class CMNISTDataset(ConfounderDataset):
             transforms.ToTensor(),
             transforms.Normalize((0.1307, 0.1307, 0.), (0.3081, 0.3081, 0.3081))
         ])
+        # 2 classes 0-4, 5-9
         self.n_classes = 2
+        # 1 red green
         self.n_confounders = 1
 
         self.color_array = np.array([x[2] for x in self.colored_mnist_train.data_label_tuples] + \
@@ -178,13 +181,23 @@ class CMNISTDataset(ConfounderDataset):
         self.features_mat = [x[0] for x in self.colored_mnist_train.data_label_tuples] + \
                             [x[0] for x in self.colored_mnist_val.data_label_tuples] +\
                             [x[0] for x in self.colored_mnist_test.data_label_tuples]
+        # 0-4 0； 5-9 1
         self.y_array = np.array([x[1] for x in self.colored_mnist_train.data_label_tuples] + \
                             [x[1] for x in self.colored_mnist_val.data_label_tuples] +
                             [x[1] for x in self.colored_mnist_test.data_label_tuples])
+        
+        # len(self.y_array) x self.n_classes 0 tensor
         self.y_array_onehot = torch.zeros(len(self.y_array), self.n_classes)
+        # 0-4 [1,0]; 5-9[0,1]
         self.y_array_onehot = self.y_array_onehot.scatter_(1, torch.tensor(self.y_array, dtype=torch.int64).unsqueeze(1), 1).numpy()
 
         self.n_groups = 4
+        # group_array ?what does this mean?
+        # red True 被视为 1，green False 被视为 0
+        # 0 0-4 green
+        # 1 5-9 green
+        # 2 0-4 red
+        # 3 5-9 red
         self.group_array = 2 * self.color_array + self.y_array
         self.split_dict = {"train": 0, "val": 1, "test": 2}
         self.train_split_array = np.zeros(30000)

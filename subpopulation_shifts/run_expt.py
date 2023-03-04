@@ -16,6 +16,9 @@ from train import train
 from utils import ParseKwargs
 from utils import set_seed, Logger, CSVBatchLogger, log_args, construct_loader, Identity
 
+# just for the log path
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -24,6 +27,7 @@ def main():
     parser.add_argument('-d', '--dataset', choices=dataset_attributes.keys(), default="CMNIST")
     parser.add_argument('-s', '--shift_type', choices=shift_types, default='confounder')
     # Confounders
+    # -t 0-4 -c isred
     parser.add_argument('-t', '--target_name', default='waterbird_complete95')
     parser.add_argument('-c', '--confounder_names', nargs='+', default=['forest2water2'])
     # Resume?
@@ -67,7 +71,7 @@ def main():
     parser.add_argument('--weight_decay', type=float, default=0.0001)
     parser.add_argument('--gamma', type=float, default=0.1)
     parser.add_argument('--minimum_variational_weight', type=float, default=0)
-    parser.add_argument('--lisa_mix_up', action='store_true', default=False)
+    parser.add_argument('--lisa_mix_up', action='store_true', default=True)
     parser.add_argument("--mix_ratio", default=0.5, type=float)
     parser.add_argument("--mix_alpha", default=2, type=float)
     parser.add_argument("--cut_mix", default=False, action='store_true')
@@ -76,7 +80,7 @@ def main():
     # Misc
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--show_progress', default=False, action='store_true')
-    parser.add_argument('--log_dir', default='./logs')
+    parser.add_argument('--log_dir', default=os.path.join(parent_dir,'logs')) # changed to env logs
     parser.add_argument('--log_every', default=50, type=int)
     parser.add_argument('--save_step', type=int, default=10)
     parser.add_argument('--save_best', action='store_true', default=False)
@@ -164,6 +168,7 @@ def main():
     if args.lisa_mix_up:
         train_loader = {}
         for i in range(train_data.n_groups):
+            # 0～4 in group
             idxes = np.where(train_data.get_group_array() == i)[0]
             if len(idxes) == 0: continue
             temp_train_data = DRODataset(Subset(train_data, idxes), process_item_fn=None, n_groups=train_data.n_groups,

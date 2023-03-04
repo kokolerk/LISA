@@ -106,7 +106,10 @@ class ConfounderDataset(Dataset):
             subsets[split] = Subset(self, indices)
         return subsets
 
+    # group str!!!
     def group_str(self, group_idx):
+        # this calculation is wrong!!!
+        # 0 y=0 c=0, but 1,y=0,c=1,is totally wrong, instead it's y=1 c=0
         y = group_idx // (self.n_groups/self.n_classes)
         c = group_idx % (self.n_groups//self.n_classes)
 
